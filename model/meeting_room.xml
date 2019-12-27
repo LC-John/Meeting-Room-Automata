@@ -1,0 +1,1187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
+<nta>
+	<declaration>// Place global declarations here.
+int envLight = 0, envTemperature = 0;
+int confOn = 0, lampOn = 0, projectorOn = 0, curtainOpen = 0, acMode = 0;
+clock lampClock, acClock, lightSenserClock, temperatureSenserClock;
+int autoMode = 1;
+
+chan EnvLight[3];
+chan EnvTemperature[3];
+chan conf, noconf;
+broadcast chan openLamp, closeLamp;
+broadcast chan openCurtain, closeCurtain;
+broadcast chan openProjector, closeProjector;
+broadcast chan warmAC, coolAC, closeAC;
+broadcast chan reset;
+
+chan toAuto, toManual;
+chan lampon, lampoff;
+chan acwarm, accool, acoff;
+chan curtainopen, curtainclose;
+chan projectoropen, projectorclose;
+chan doreset;</declaration>
+	<template>
+		<name x="5" y="5">Lamp</name>
+		<declaration>// Place local declarations here.
+</declaration>
+		<location id="id0" x="-1504" y="-1538">
+			<name x="-1538" y="-1572">getOffSignal</name>
+			<committed/>
+		</location>
+		<location id="id1" x="-1504" y="-1300">
+			<name x="-1538" y="-1283">getOnSignal</name>
+			<committed/>
+		</location>
+		<location id="id2" x="-1369" y="-1420">
+			<name x="-1351" y="-1428">on</name>
+		</location>
+		<location id="id3" x="-1641" y="-1419">
+			<name x="-1683" y="-1428">off</name>
+		</location>
+		<init ref="id3"/>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id3"/>
+			<label kind="assignment" x="-1657" y="-1530">lampOn=0</label>
+			<nail x="-1640" y="-1487"/>
+		</transition>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id2"/>
+			<label kind="assignment" x="-1436" y="-1326">lampOn=1</label>
+			<nail x="-1368" y="-1351"/>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id0"/>
+			<label kind="synchronisation" x="-1419" y="-1530">closeLamp?</label>
+			<nail x="-1368" y="-1487"/>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id1"/>
+			<label kind="synchronisation" x="-1640" y="-1326">openLamp?</label>
+			<nail x="-1640" y="-1351"/>
+		</transition>
+	</template>
+	<template>
+		<name>Curtain</name>
+		<location id="id4" x="-654" y="-603">
+			<name x="-688" y="-637">getOffSignal</name>
+			<committed/>
+		</location>
+		<location id="id5" x="-791" y="-484">
+			<name x="-841" y="-493">close</name>
+		</location>
+		<location id="id6" x="-654" y="-365">
+			<name x="-688" y="-348">getOnSignal</name>
+			<committed/>
+		</location>
+		<location id="id7" x="-519" y="-485">
+			<name x="-501" y="-493">open</name>
+		</location>
+		<init ref="id7"/>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id5"/>
+			<label kind="assignment" x="-807" y="-595">curtainOpen=0</label>
+			<nail x="-790" y="-552"/>
+		</transition>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id7"/>
+			<label kind="assignment" x="-586" y="-391">curtainOpen=1</label>
+			<nail x="-518" y="-416"/>
+		</transition>
+		<transition>
+			<source ref="id7"/>
+			<target ref="id4"/>
+			<label kind="synchronisation" x="-569" y="-595">closeCurtain?</label>
+			<nail x="-518" y="-552"/>
+		</transition>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id6"/>
+			<label kind="synchronisation" x="-790" y="-391">openCurtain?</label>
+			<nail x="-790" y="-416"/>
+		</transition>
+	</template>
+	<template>
+		<name>Projector</name>
+		<location id="id8" x="-1053" y="-1257">
+			<name x="-1087" y="-1291">getOffSignal</name>
+			<committed/>
+		</location>
+		<location id="id9" x="-1053" y="-1019">
+			<name x="-1087" y="-1002">getOnSignal</name>
+			<committed/>
+		</location>
+		<location id="id10" x="-918" y="-1139">
+			<name x="-900" y="-1147">on</name>
+		</location>
+		<location id="id11" x="-1190" y="-1138">
+			<name x="-1232" y="-1147">off</name>
+		</location>
+		<init ref="id11"/>
+		<transition>
+			<source ref="id8"/>
+			<target ref="id11"/>
+			<label kind="assignment" x="-1206" y="-1249">projectorOn=0</label>
+			<nail x="-1189" y="-1206"/>
+		</transition>
+		<transition>
+			<source ref="id9"/>
+			<target ref="id10"/>
+			<label kind="assignment" x="-985" y="-1045">projectorOn=1</label>
+			<nail x="-917" y="-1070"/>
+		</transition>
+		<transition>
+			<source ref="id10"/>
+			<target ref="id8"/>
+			<label kind="synchronisation" x="-968" y="-1249">closeProjector?</label>
+			<nail x="-917" y="-1206"/>
+		</transition>
+		<transition>
+			<source ref="id11"/>
+			<target ref="id9"/>
+			<label kind="synchronisation" x="-1224" y="-1045">openProjector?</label>
+			<nail x="-1189" y="-1070"/>
+		</transition>
+	</template>
+	<template>
+		<name>AC</name>
+		<location id="id12" x="-161" y="-263">
+			<name x="-212" y="-246">getOffSignal</name>
+			<committed/>
+		</location>
+		<location id="id13" x="-297" y="-263">
+			<name x="-340" y="-272">off</name>
+		</location>
+		<location id="id14" x="-161" y="-110">
+			<name x="-195" y="-93">getCoolSignal</name>
+			<committed/>
+		</location>
+		<location id="id15" x="-25" y="-229">
+			<name x="-7" y="-237">cool</name>
+		</location>
+		<location id="id16" x="-161" y="-416">
+			<name x="-204" y="-450">getWarmSignal</name>
+			<committed/>
+		</location>
+		<location id="id17" x="-25" y="-289">
+			<name x="-7" y="-297">warm</name>
+		</location>
+		<init ref="id13"/>
+		<transition>
+			<source ref="id17"/>
+			<target ref="id12"/>
+			<label kind="synchronisation" x="-110" y="-306">closeAC?</label>
+		</transition>
+		<transition>
+			<source ref="id12"/>
+			<target ref="id13"/>
+			<label kind="assignment" x="-272" y="-289">acMode=0</label>
+		</transition>
+		<transition>
+			<source ref="id14"/>
+			<target ref="id15"/>
+			<label kind="assignment" x="-92" y="-135">acMode=1</label>
+			<nail x="-24" y="-160"/>
+		</transition>
+		<transition>
+			<source ref="id15"/>
+			<target ref="id12"/>
+			<label kind="synchronisation" x="-110" y="-238">closeAC?</label>
+		</transition>
+		<transition>
+			<source ref="id13"/>
+			<target ref="id14"/>
+			<label kind="synchronisation" x="-296" y="-135">coolAC?</label>
+			<nail x="-296" y="-160"/>
+		</transition>
+		<transition>
+			<source ref="id16"/>
+			<target ref="id17"/>
+			<label kind="assignment" x="-85" y="-416">acMode=2</label>
+			<nail x="-25" y="-374"/>
+		</transition>
+		<transition>
+			<source ref="id13"/>
+			<target ref="id16"/>
+			<label kind="synchronisation" x="-289" y="-416">warmAC?</label>
+			<nail x="-297" y="-374"/>
+		</transition>
+	</template>
+	<template>
+		<name>envLightSenser</name>
+		<declaration>clock x;</declaration>
+		<location id="id18" x="-1258" y="-892">
+			<name x="-1309" y="-901">check</name>
+			<label kind="invariant" x="-1402" y="-884">lightSenserClock&lt;=60</label>
+			<committed/>
+		</location>
+		<location id="id19" x="-994" y="-892">
+			<name x="-977" y="-901">wait</name>
+			<urgent/>
+		</location>
+		<init ref="id19"/>
+		<transition>
+			<source ref="id19"/>
+			<target ref="id18"/>
+			<label kind="synchronisation" x="-1164" y="-841">EnvLight[1]!</label>
+			<label kind="assignment" x="-1164" y="-858">envLight=1</label>
+			<nail x="-1079" y="-841"/>
+			<nail x="-1181" y="-841"/>
+		</transition>
+		<transition>
+			<source ref="id19"/>
+			<target ref="id18"/>
+			<label kind="synchronisation" x="-1164" y="-799">EnvLight[2]!</label>
+			<label kind="assignment" x="-1164" y="-782">envLight=2</label>
+			<nail x="-1062" y="-799"/>
+			<nail x="-1190" y="-799"/>
+		</transition>
+		<transition>
+			<source ref="id19"/>
+			<target ref="id18"/>
+			<label kind="synchronisation" x="-1164" y="-977">EnvLight[0]!</label>
+			<label kind="assignment" x="-1164" y="-960">envLight=0</label>
+			<nail x="-1062" y="-960"/>
+			<nail x="-1190" y="-960"/>
+		</transition>
+		<transition>
+			<source ref="id18"/>
+			<target ref="id19"/>
+			<label kind="assignment" x="-1181" y="-892">lightSenserClock=0</label>
+		</transition>
+	</template>
+	<template>
+		<name>envTemperatureSenser</name>
+		<location id="id20" x="-689" y="-510">
+			<name x="-740" y="-519">check</name>
+			<label kind="invariant" x="-884" y="-501">temperatureSenserClock&lt;=60</label>
+			<committed/>
+		</location>
+		<location id="id21" x="-425" y="-510">
+			<name x="-408" y="-519">wait</name>
+			<urgent/>
+		</location>
+		<init ref="id21"/>
+		<transition>
+			<source ref="id21"/>
+			<target ref="id20"/>
+			<label kind="synchronisation" x="-612" y="-459">EnvTemperature[1]!</label>
+			<label kind="assignment" x="-612" y="-484">envTemperature=1</label>
+			<nail x="-510" y="-459"/>
+			<nail x="-612" y="-459"/>
+		</transition>
+		<transition>
+			<source ref="id21"/>
+			<target ref="id20"/>
+			<label kind="synchronisation" x="-612" y="-416">EnvTemperature[2]!</label>
+			<label kind="assignment" x="-612" y="-399">envTemperature=2</label>
+			<nail x="-493" y="-417"/>
+			<nail x="-621" y="-417"/>
+		</transition>
+		<transition>
+			<source ref="id21"/>
+			<target ref="id20"/>
+			<label kind="synchronisation" x="-612" y="-603">EnvTemperature[0]!</label>
+			<label kind="assignment" x="-612" y="-578">envTemperature=0</label>
+			<nail x="-493" y="-578"/>
+			<nail x="-621" y="-578"/>
+		</transition>
+		<transition>
+			<source ref="id20"/>
+			<target ref="id21"/>
+			<label kind="assignment" x="-637" y="-535">temperatureSenserClock=0</label>
+		</transition>
+	</template>
+	<template>
+		<name>Controller</name>
+		<location id="id22" x="-663" y="-263">
+			<committed/>
+		</location>
+		<location id="id23" x="-799" y="-331">
+			<committed/>
+		</location>
+		<location id="id24" x="-884" y="-289">
+			<committed/>
+		</location>
+		<location id="id25" x="-340" y="-484">
+			<committed/>
+		</location>
+		<location id="id26" x="-1122" y="-484">
+			<committed/>
+		</location>
+		<location id="id27" x="-586" y="-433">
+			<committed/>
+		</location>
+		<location id="id28" x="-459" y="-433">
+			<committed/>
+		</location>
+		<location id="id29" x="-459" y="-484">
+			<committed/>
+		</location>
+		<location id="id30" x="-459" y="-561">
+			<committed/>
+		</location>
+		<location id="id31" x="-586" y="-561">
+			<committed/>
+		</location>
+		<location id="id32" x="-586" y="-484">
+			<committed/>
+		</location>
+		<location id="id33" x="-1003" y="-484">
+			<committed/>
+		</location>
+		<location id="id34" x="-1003" y="-561">
+			<committed/>
+		</location>
+		<location id="id35" x="-867" y="-561">
+			<committed/>
+		</location>
+		<location id="id36" x="-867" y="-484">
+			<committed/>
+		</location>
+		<location id="id37" x="-459" y="-382">
+			<committed/>
+		</location>
+		<location id="id38" x="-1003" y="-408">
+			<committed/>
+		</location>
+		<location id="id39" x="-586" y="-382">
+			<committed/>
+		</location>
+		<location id="id40" x="-867" y="-408">
+			<committed/>
+		</location>
+		<location id="id41" x="-731" y="-433">
+			<name x="-722" y="-425">manual</name>
+		</location>
+		<location id="id42" x="-459" y="-204">
+			<committed/>
+		</location>
+		<location id="id43" x="-612" y="187">
+			<committed/>
+		</location>
+		<location id="id44" x="-425" y="187">
+			<committed/>
+		</location>
+		<location id="id45" x="-314" y="187">
+			<label kind="invariant" x="-382" y="204">lampClock&lt;=20</label>
+			<committed/>
+		</location>
+		<location id="id46" x="-501" y="187">
+			<label kind="invariant" x="-544" y="204">lampClock&lt;=20</label>
+			<committed/>
+		</location>
+		<location id="id47" x="-688" y="187">
+			<label kind="invariant" x="-739" y="204">lampClock&lt;=20</label>
+			<committed/>
+		</location>
+		<location id="id48" x="-314" y="59">
+			<urgent/>
+		</location>
+		<location id="id49" x="-501" y="59">
+			<urgent/>
+		</location>
+		<location id="id50" x="-688" y="59">
+			<urgent/>
+		</location>
+		<location id="id51" x="-1011" y="-153">
+			<committed/>
+		</location>
+		<location id="id52" x="-586" y="-153">
+			<committed/>
+		</location>
+		<location id="id53" x="-459" y="-153">
+			<committed/>
+		</location>
+		<location id="id54" x="-858" y="-153">
+			<committed/>
+		</location>
+		<location id="id55" x="-586" y="-204">
+			<committed/>
+		</location>
+		<location id="id56" x="-731" y="-153">
+			<name x="-722" y="-187">auto</name>
+		</location>
+		<location id="id57" x="-969" y="59">
+			<urgent/>
+		</location>
+		<location id="id58" x="-969" y="187">
+			<label kind="invariant" x="-1011" y="204">acClock&lt;=5</label>
+			<committed/>
+		</location>
+		<location id="id59" x="-1096" y="187">
+			<label kind="invariant" x="-1138" y="204">acClock&lt;=5</label>
+			<committed/>
+		</location>
+		<location id="id60" x="-1079" y="59">
+			<urgent/>
+		</location>
+		<location id="id61" x="-850" y="59">
+			<urgent/>
+		</location>
+		<location id="id62" x="-850" y="187">
+			<label kind="invariant" x="-884" y="204">acClock&lt;=5</label>
+			<committed/>
+		</location>
+		<location id="id63" x="-1003" y="-671">
+			<committed/>
+		</location>
+		<location id="id64" x="-867" y="-671">
+			<committed/>
+		</location>
+		<location id="id65" x="-799" y="-671">
+			<committed/>
+		</location>
+		<location id="id66" x="-663" y="-671">
+			<committed/>
+		</location>
+		<location id="id67" x="-459" y="-671">
+			<committed/>
+		</location>
+		<location id="id68" x="-586" y="-671">
+			<committed/>
+		</location>
+		<location id="id69" x="-569" y="-289">
+			<committed/>
+		</location>
+		<init ref="id56"/>
+		<transition>
+			<source ref="id22"/>
+			<target ref="id56"/>
+			<label kind="synchronisation" x="-714" y="-255">reset!</label>
+			<nail x="-714" y="-263"/>
+		</transition>
+		<transition>
+			<source ref="id56"/>
+			<target ref="id22"/>
+			<label kind="synchronisation" x="-714" y="-314">doreset?</label>
+			<nail x="-731" y="-170"/>
+			<nail x="-731" y="-297"/>
+			<nail x="-663" y="-297"/>
+			<nail x="-663" y="-289"/>
+		</transition>
+		<transition>
+			<source ref="id23"/>
+			<target ref="id41"/>
+			<label kind="synchronisation" x="-790" y="-365">reset!</label>
+			<nail x="-756" y="-331"/>
+		</transition>
+		<transition>
+			<source ref="id41"/>
+			<target ref="id23"/>
+			<label kind="synchronisation" x="-816" y="-297">doreset?</label>
+			<nail x="-731" y="-297"/>
+			<nail x="-799" y="-297"/>
+		</transition>
+		<transition>
+			<source ref="id69"/>
+			<target ref="id41"/>
+			<label kind="synchronisation" x="-620" y="-348">reset!</label>
+			<nail x="-569" y="-348"/>
+			<nail x="-722" y="-348"/>
+		</transition>
+		<transition>
+			<source ref="id24"/>
+			<target ref="id56"/>
+			<label kind="synchronisation" x="-875" y="-221">reset!</label>
+			<nail x="-884" y="-195"/>
+			<nail x="-739" y="-195"/>
+		</transition>
+		<transition>
+			<source ref="id25"/>
+			<target ref="id41"/>
+			<nail x="-340" y="-450"/>
+			<nail x="-586" y="-450"/>
+		</transition>
+		<transition>
+			<source ref="id29"/>
+			<target ref="id25"/>
+			<label kind="synchronisation" x="-441" y="-501">openCurtain!</label>
+		</transition>
+		<transition>
+			<source ref="id26"/>
+			<target ref="id41"/>
+			<nail x="-1122" y="-459"/>
+			<nail x="-867" y="-459"/>
+		</transition>
+		<transition>
+			<source ref="id33"/>
+			<target ref="id26"/>
+			<label kind="synchronisation" x="-1095" y="-501">openLamp!</label>
+		</transition>
+		<transition>
+			<source ref="id27"/>
+			<target ref="id41"/>
+		</transition>
+		<transition>
+			<source ref="id28"/>
+			<target ref="id27"/>
+			<label kind="synchronisation" x="-569" y="-425">openProjector!</label>
+		</transition>
+		<transition>
+			<source ref="id37"/>
+			<target ref="id28"/>
+			<label kind="synchronisation" x="-450" y="-416">closeCurtain!</label>
+		</transition>
+		<transition>
+			<source ref="id67"/>
+			<target ref="id41"/>
+			<nail x="-458" y="-629"/>
+			<nail x="-586" y="-629"/>
+		</transition>
+		<transition>
+			<source ref="id41"/>
+			<target ref="id68"/>
+			<label kind="synchronisation" x="-646" y="-654">acoff?</label>
+		</transition>
+		<transition>
+			<source ref="id65"/>
+			<target ref="id41"/>
+		</transition>
+		<transition>
+			<source ref="id41"/>
+			<target ref="id66"/>
+			<label kind="synchronisation" x="-731" y="-620">accool?</label>
+		</transition>
+		<transition>
+			<source ref="id63"/>
+			<target ref="id41"/>
+			<nail x="-1003" y="-629"/>
+			<nail x="-867" y="-629"/>
+		</transition>
+		<transition>
+			<source ref="id41"/>
+			<target ref="id64"/>
+			<label kind="synchronisation" x="-867" y="-654">acwarm?</label>
+		</transition>
+		<transition>
+			<source ref="id62"/>
+			<target ref="id56"/>
+			<nail x="-739" y="187"/>
+		</transition>
+		<transition>
+			<source ref="id61"/>
+			<target ref="id62"/>
+			<label kind="synchronisation" x="-867" y="110">closeAC!</label>
+		</transition>
+		<transition>
+			<source ref="id56"/>
+			<target ref="id61"/>
+			<label kind="synchronisation" x="-875" y="0">EnvTemperature[0]?</label>
+			<label kind="assignment" x="-849" y="17">acClock=0</label>
+		</transition>
+		<transition>
+			<source ref="id58"/>
+			<target ref="id56"/>
+			<nail x="-884" y="9"/>
+		</transition>
+		<transition>
+			<source ref="id57"/>
+			<target ref="id58"/>
+			<label kind="synchronisation" x="-1011" y="102">warmAC!</label>
+		</transition>
+		<transition>
+			<source ref="id56"/>
+			<target ref="id57"/>
+			<label kind="synchronisation" x="-1037" y="17">EnvTemperature[1]?</label>
+			<label kind="assignment" x="-1003" y="0">acClock=0</label>
+		</transition>
+		<transition>
+			<source ref="id41"/>
+			<target ref="id39"/>
+			<label kind="synchronisation" x="-697" y="-382">projectoropen?</label>
+			<nail x="-646" y="-382"/>
+			<nail x="-603" y="-382"/>
+		</transition>
+		<transition>
+			<source ref="id41"/>
+			<target ref="id40"/>
+			<label kind="synchronisation" x="-850" y="-408">projectorclose?</label>
+			<nail x="-773" y="-408"/>
+		</transition>
+		<transition>
+			<source ref="id30"/>
+			<target ref="id41"/>
+			<nail x="-459" y="-527"/>
+			<nail x="-586" y="-527"/>
+		</transition>
+		<transition>
+			<source ref="id34"/>
+			<target ref="id41"/>
+			<nail x="-1003" y="-527"/>
+			<nail x="-867" y="-527"/>
+		</transition>
+		<transition>
+			<source ref="id32"/>
+			<target ref="id29"/>
+			<label kind="synchronisation" x="-569" y="-501">closeProjector!</label>
+		</transition>
+		<transition>
+			<source ref="id31"/>
+			<target ref="id30"/>
+			<label kind="synchronisation" x="-569" y="-586">closeCurtain!</label>
+		</transition>
+		<transition>
+			<source ref="id41"/>
+			<target ref="id31"/>
+			<label kind="synchronisation" x="-637" y="-552">curtainclose?</label>
+		</transition>
+		<transition>
+			<source ref="id41"/>
+			<target ref="id32"/>
+			<label kind="synchronisation" x="-663" y="-476">curtainopen?</label>
+		</transition>
+		<transition>
+			<source ref="id36"/>
+			<target ref="id33"/>
+			<label kind="synchronisation" x="-977" y="-501">closeProjector!</label>
+		</transition>
+		<transition>
+			<source ref="id35"/>
+			<target ref="id34"/>
+			<label kind="synchronisation" x="-969" y="-586">closeLamp!</label>
+		</transition>
+		<transition>
+			<source ref="id38"/>
+			<target ref="id41"/>
+			<nail x="-1003" y="-433"/>
+		</transition>
+		<transition>
+			<source ref="id41"/>
+			<target ref="id35"/>
+			<label kind="synchronisation" x="-867" y="-552">lampoff?</label>
+		</transition>
+		<transition>
+			<source ref="id41"/>
+			<target ref="id36"/>
+			<label kind="synchronisation" x="-858" y="-476">lampon?</label>
+		</transition>
+		<transition>
+			<source ref="id39"/>
+			<target ref="id37"/>
+			<label kind="synchronisation" x="-561" y="-382">closeLamp!</label>
+		</transition>
+		<transition>
+			<source ref="id40"/>
+			<target ref="id38"/>
+			<label kind="synchronisation" x="-977" y="-408">closeProjector!</label>
+		</transition>
+		<transition>
+			<source ref="id41"/>
+			<target ref="id24"/>
+			<label kind="synchronisation" x="-901" y="-366">toAuto?</label>
+			<nail x="-765" y="-374"/>
+			<nail x="-884" y="-374"/>
+		</transition>
+		<transition>
+			<source ref="id42"/>
+			<target ref="id53"/>
+			<label kind="synchronisation" x="-450" y="-187">closeCurtain!</label>
+		</transition>
+		<transition>
+			<source ref="id55"/>
+			<target ref="id42"/>
+			<label kind="synchronisation" x="-560" y="-221">closeLamp!</label>
+		</transition>
+		<transition>
+			<source ref="id46"/>
+			<target ref="id56"/>
+		</transition>
+		<transition>
+			<source ref="id44"/>
+			<target ref="id56"/>
+			<nail x="-424" y="68"/>
+		</transition>
+		<transition>
+			<source ref="id43"/>
+			<target ref="id56"/>
+			<nail x="-620" y="34"/>
+		</transition>
+		<transition>
+			<source ref="id47"/>
+			<target ref="id56"/>
+			<nail x="-739" y="187"/>
+		</transition>
+		<transition>
+			<source ref="id46"/>
+			<target ref="id43"/>
+			<label kind="guard" x="-586" y="170">confOn==0</label>
+			<label kind="synchronisation" x="-595" y="187">openCurtain!</label>
+		</transition>
+		<transition>
+			<source ref="id45"/>
+			<target ref="id44"/>
+			<label kind="synchronisation" x="-408" y="161">closeCurtain!</label>
+		</transition>
+		<transition>
+			<source ref="id48"/>
+			<target ref="id45"/>
+			<label kind="synchronisation" x="-356" y="102">closeLamp!</label>
+		</transition>
+		<transition>
+			<source ref="id49"/>
+			<target ref="id46"/>
+			<label kind="synchronisation" x="-527" y="102">closeLamp!</label>
+		</transition>
+		<transition>
+			<source ref="id50"/>
+			<target ref="id47"/>
+			<label kind="synchronisation" x="-705" y="102">openLamp!</label>
+		</transition>
+		<transition>
+			<source ref="id56"/>
+			<target ref="id48"/>
+			<label kind="synchronisation" x="-399" y="-17">EnvLight[2]?</label>
+			<label kind="assignment" x="-399" y="0">lampClock=0</label>
+		</transition>
+		<transition>
+			<source ref="id56"/>
+			<target ref="id49"/>
+			<label kind="synchronisation" x="-594" y="9">EnvLight[1]?</label>
+			<label kind="assignment" x="-585" y="26">lampClock=0</label>
+		</transition>
+		<transition>
+			<source ref="id56"/>
+			<target ref="id50"/>
+			<label kind="guard" x="-722" y="-17">confOn==0</label>
+			<label kind="synchronisation" x="-722" y="0">EnvLight[0]?</label>
+			<label kind="assignment" x="-722" y="17">lampClock=0</label>
+		</transition>
+		<transition>
+			<source ref="id52"/>
+			<target ref="id56"/>
+		</transition>
+		<transition>
+			<source ref="id51"/>
+			<target ref="id56"/>
+			<nail x="-1011" y="-119"/>
+		</transition>
+		<transition>
+			<source ref="id54"/>
+			<target ref="id51"/>
+			<label kind="synchronisation" x="-977" y="-178">closeProjector!</label>
+		</transition>
+		<transition>
+			<source ref="id56"/>
+			<target ref="id54"/>
+			<label kind="synchronisation" x="-833" y="-178">noconf?</label>
+		</transition>
+		<transition>
+			<source ref="id53"/>
+			<target ref="id52"/>
+			<label kind="synchronisation" x="-569" y="-179">openProjector!</label>
+		</transition>
+		<transition>
+			<source ref="id56"/>
+			<target ref="id55"/>
+			<label kind="synchronisation" x="-646" y="-179">conf?</label>
+		</transition>
+		<transition>
+			<source ref="id59"/>
+			<target ref="id56"/>
+			<nail x="-1096" y="-17"/>
+		</transition>
+		<transition>
+			<source ref="id60"/>
+			<target ref="id59"/>
+			<label kind="synchronisation" x="-1079" y="119">coolAC!</label>
+		</transition>
+		<transition>
+			<source ref="id56"/>
+			<target ref="id60"/>
+			<label kind="synchronisation" x="-1020" y="-42">EnvTemperature[2]?</label>
+			<label kind="assignment" x="-1020" y="-25">acClock=0</label>
+			<nail x="-994" y="-25"/>
+		</transition>
+		<transition>
+			<source ref="id64"/>
+			<target ref="id63"/>
+			<label kind="synchronisation" x="-969" y="-671">warmAC!</label>
+		</transition>
+		<transition>
+			<source ref="id66"/>
+			<target ref="id65"/>
+			<label kind="synchronisation" x="-756" y="-671">coolAC!</label>
+		</transition>
+		<transition>
+			<source ref="id68"/>
+			<target ref="id67"/>
+			<label kind="synchronisation" x="-552" y="-671">closeAC!</label>
+		</transition>
+		<transition>
+			<source ref="id56"/>
+			<target ref="id69"/>
+			<label kind="synchronisation" x="-637" y="-246">toManual?</label>
+			<nail x="-731" y="-170"/>
+			<nail x="-688" y="-221"/>
+			<nail x="-569" y="-221"/>
+		</transition>
+	</template>
+	<template>
+		<name>Reset</name>
+		<location id="id70" x="25" y="17">
+			<committed/>
+		</location>
+		<location id="id71" x="25" y="93">
+			<name x="8" y="110">done</name>
+			<committed/>
+		</location>
+		<location id="id72" x="-93" y="17">
+			<name x="-101" y="34">wait</name>
+		</location>
+		<location id="id73" x="-93" y="-68">
+			<committed/>
+		</location>
+		<location id="id74" x="170" y="17">
+			<committed/>
+		</location>
+		<location id="id75" x="170" y="-68">
+			<committed/>
+		</location>
+		<location id="id76" x="26" y="-68">
+			<committed/>
+		</location>
+		<init ref="id72"/>
+		<transition>
+			<source ref="id70"/>
+			<target ref="id71"/>
+			<label kind="assignment" x="34" y="59">confOn:=0</label>
+		</transition>
+		<transition>
+			<source ref="id71"/>
+			<target ref="id72"/>
+		</transition>
+		<transition>
+			<source ref="id72"/>
+			<target ref="id73"/>
+			<label kind="synchronisation" x="-85" y="-34">reset?</label>
+		</transition>
+		<transition>
+			<source ref="id74"/>
+			<target ref="id70"/>
+			<label kind="synchronisation" x="51" y="0">openCurtain!</label>
+			<label kind="assignment" x="51" y="17">curtainOpen:=1</label>
+		</transition>
+		<transition>
+			<source ref="id75"/>
+			<target ref="id74"/>
+			<label kind="synchronisation" x="178" y="-51">closeAC!</label>
+			<label kind="assignment" x="178" y="-34">acMode:=0</label>
+		</transition>
+		<transition>
+			<source ref="id76"/>
+			<target ref="id75"/>
+			<label kind="synchronisation" x="44" y="-85">closeProjector!</label>
+			<label kind="assignment" x="42" y="-68">projectorOn:=0</label>
+		</transition>
+		<transition>
+			<source ref="id73"/>
+			<target ref="id76"/>
+			<label kind="synchronisation" x="-75" y="-85">closeLamp!</label>
+			<label kind="assignment" x="-75" y="-68">lampOn:=0</label>
+		</transition>
+	</template>
+	<template>
+		<name>setAuto</name>
+		<location id="id77" x="-187" y="-8">
+			<committed/>
+		</location>
+		<location id="id78" x="-102" y="-8">
+			<name x="-85" y="-17">wait</name>
+		</location>
+		<init ref="id78"/>
+		<transition>
+			<source ref="id78"/>
+			<target ref="id77"/>
+			<label kind="synchronisation" x="-170" y="76">toAuto!</label>
+			<label kind="assignment" x="-187" y="59">autoMode:=1</label>
+			<nail x="-102" y="59"/>
+			<nail x="-187" y="59"/>
+		</transition>
+		<transition>
+			<source ref="id78"/>
+			<target ref="id77"/>
+			<label kind="synchronisation" x="-178" y="-110">toManual!</label>
+			<label kind="assignment" x="-187" y="-93">autoMode:=0</label>
+			<nail x="-102" y="-76"/>
+			<nail x="-187" y="-76"/>
+		</transition>
+		<transition>
+			<source ref="id77"/>
+			<target ref="id78"/>
+		</transition>
+	</template>
+	<template>
+		<name>setConference</name>
+		<location id="id79" x="-374" y="-59">
+			<committed/>
+		</location>
+		<location id="id80" x="-289" y="-59">
+			<name x="-272" y="-76">wait</name>
+		</location>
+		<init ref="id80"/>
+		<transition>
+			<source ref="id80"/>
+			<target ref="id79"/>
+			<label kind="synchronisation" x="-348" y="25">conf!</label>
+			<label kind="assignment" x="-356" y="8">confOn:=1</label>
+			<nail x="-289" y="8"/>
+			<nail x="-374" y="8"/>
+		</transition>
+		<transition>
+			<source ref="id80"/>
+			<target ref="id79"/>
+			<label kind="synchronisation" x="-357" y="-161">noconf!</label>
+			<label kind="assignment" x="-365" y="-144">confOn:=0</label>
+			<nail x="-289" y="-127"/>
+			<nail x="-374" y="-127"/>
+		</transition>
+		<transition>
+			<source ref="id79"/>
+			<target ref="id80"/>
+		</transition>
+	</template>
+	<template>
+		<name>setLamp</name>
+		<location id="id81" x="-102" y="-17">
+			<committed/>
+		</location>
+		<location id="id82" x="-17" y="-17">
+			<name x="0" y="-25">wait</name>
+		</location>
+		<init ref="id82"/>
+		<transition>
+			<source ref="id82"/>
+			<target ref="id81"/>
+			<label kind="synchronisation" x="-85" y="51">lampon!</label>
+			<nail x="-17" y="50"/>
+			<nail x="-102" y="50"/>
+		</transition>
+		<transition>
+			<source ref="id82"/>
+			<target ref="id81"/>
+			<label kind="synchronisation" x="-85" y="-110">lampoff!</label>
+			<nail x="-17" y="-85"/>
+			<nail x="-102" y="-85"/>
+		</transition>
+		<transition>
+			<source ref="id81"/>
+			<target ref="id82"/>
+		</transition>
+	</template>
+	<template>
+		<name>setAC</name>
+		<location id="id83" x="-102" y="-17">
+			<committed/>
+		</location>
+		<location id="id84" x="-17" y="-17">
+			<name x="0" y="-25">wait</name>
+		</location>
+		<init ref="id84"/>
+		<transition>
+			<source ref="id84"/>
+			<target ref="id83"/>
+			<label kind="synchronisation" x="-85" y="0">accool!</label>
+			<nail x="-59" y="0"/>
+		</transition>
+		<transition>
+			<source ref="id84"/>
+			<target ref="id83"/>
+			<label kind="synchronisation" x="-85" y="51">acwarm!</label>
+			<nail x="-17" y="50"/>
+			<nail x="-102" y="50"/>
+		</transition>
+		<transition>
+			<source ref="id84"/>
+			<target ref="id83"/>
+			<label kind="synchronisation" x="-76" y="-110">acoff!</label>
+			<nail x="-17" y="-85"/>
+			<nail x="-102" y="-85"/>
+		</transition>
+		<transition>
+			<source ref="id83"/>
+			<target ref="id84"/>
+			<nail x="-59" y="-34"/>
+		</transition>
+	</template>
+	<template>
+		<name>setCurtain</name>
+		<location id="id85" x="-161" y="-42">
+			<committed/>
+		</location>
+		<location id="id86" x="-76" y="-42">
+			<name x="-59" y="-50">wait</name>
+		</location>
+		<init ref="id86"/>
+		<transition>
+			<source ref="id86"/>
+			<target ref="id85"/>
+			<label kind="synchronisation" x="-153" y="25">curtainopen!</label>
+			<nail x="-76" y="25"/>
+			<nail x="-161" y="25"/>
+		</transition>
+		<transition>
+			<source ref="id86"/>
+			<target ref="id85"/>
+			<label kind="synchronisation" x="-153" y="-136">curtainclose!</label>
+			<nail x="-76" y="-110"/>
+			<nail x="-161" y="-110"/>
+		</transition>
+		<transition>
+			<source ref="id85"/>
+			<target ref="id86"/>
+		</transition>
+	</template>
+	<template>
+		<name>setProjector</name>
+		<location id="id87" x="-195" y="-76">
+			<committed/>
+		</location>
+		<location id="id88" x="-110" y="-76">
+			<name x="-93" y="-84">wait</name>
+		</location>
+		<init ref="id88"/>
+		<transition>
+			<source ref="id88"/>
+			<target ref="id87"/>
+			<label kind="synchronisation" x="-195" y="-8">projectoropen!</label>
+			<nail x="-110" y="-9"/>
+			<nail x="-195" y="-9"/>
+		</transition>
+		<transition>
+			<source ref="id88"/>
+			<target ref="id87"/>
+			<label kind="synchronisation" x="-195" y="-170">projectorclose!</label>
+			<nail x="-110" y="-144"/>
+			<nail x="-195" y="-144"/>
+		</transition>
+		<transition>
+			<source ref="id87"/>
+			<target ref="id88"/>
+		</transition>
+	</template>
+	<template>
+		<name>setReset</name>
+		<location id="id89" x="0" y="0">
+			<name x="-17" y="17">wait</name>
+		</location>
+		<init ref="id89"/>
+		<transition>
+			<source ref="id89"/>
+			<target ref="id89"/>
+			<label kind="synchronisation" x="0" y="-76">doreset!</label>
+			<nail x="0" y="-51"/>
+			<nail x="59" y="-51"/>
+			<nail x="59" y="0"/>
+		</transition>
+	</template>
+	<system>// Place template instantiations here.
+_Lamp = Lamp();
+_Curtain = Curtain();
+_Projector = Projector();
+_AC = AC();
+_Controller = Controller();
+_envLightSenser = envLightSenser();
+_envTemperatureSenser = envTemperatureSenser();
+_setConference = setConference();
+_setAuto = setAuto();
+_setLamp = setLamp();
+_setAC = setAC();
+_setCurtain = setCurtain();
+_setProjector = setProjector();
+_reset = Reset();
+_setReset = setReset();
+
+// List one or more processes to be composed into a system.
+system _Lamp, _Curtain, _Projector, _AC, _Controller,
+    _envLightSenser, _envTemperatureSenser, _setConference,
+    _setAuto, _setLamp, _setAC, _setCurtain, _setProjector,
+    _reset, _setReset;</system>
+	<queries>
+		<query>
+			<formula>A[] _Projector.on+ _Curtain.open &lt; 2
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A[] _Projector.on + _Lamp.on &lt; 2
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A[] _envTemperatureSenser.check imply temperatureSenserClock &lt;= 60
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A[] _envLightSenser.check imply lightSenserClock &lt;= 60
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A[] _Lamp.on imply lampClock&lt;=20
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A[] _Lamp.off imply lampClock&lt;=20
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A[] _Curtain.open imply lampClock&lt;=20
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A[] _Curtain.close imply lampClock&lt;=20
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A[] _AC.cool imply acClock&lt;=5
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A[] _AC.warm imply acClock&lt;=5
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A[] _AC.off imply acClock&lt;=5
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A[] _reset.done imply confOn==0 and lampOn==0 and projectorOn==0 and curtainOpen==1 and acMode==0
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A[] not deadlock
+			</formula>
+			<comment>
+			</comment>
+		</query>
+	</queries>
+</nta>
